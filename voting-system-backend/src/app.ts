@@ -6,6 +6,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { connectMongoDB, closeConnections, redis } from './config/db';
 import authRoutes from './routes/auth.routes';
+import pollRoutes from './routes/poll.routes';
 
 const app = express();
 const httpServer = createServer(app);
@@ -46,6 +47,7 @@ app.get('/', (req, res) => {
 
 // API 路由
 app.use('/api/auth', authRoutes);
+app.use('/api/votes', pollRoutes);
 
 // 连接数据库
 connectMongoDB();

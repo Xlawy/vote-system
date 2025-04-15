@@ -149,7 +149,7 @@ export default function Home() {
             variant="contained"
             size="large"
             component={Link}
-            href="/polls"
+            href="/votes"
             sx={{
               px: 6,
               py: 1.5,

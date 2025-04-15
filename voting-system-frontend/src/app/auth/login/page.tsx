@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { authApi } from '@/services/api';
 import { showMessage } from '@/components/Message';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Box,
   Container,
@@ -20,6 +21,7 @@ import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setUser } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -66,6 +68,7 @@ export default function LoginPage() {
     try {
       const response = await authApi.login(formData.email, formData.password);
       localStorage.setItem('token', response.token);
+      setUser(response.user);
       showMessage({
         type: 'success',
         message: '登录成功',
@@ -78,6 +81,7 @@ export default function LoginPage() {
           password: ''
         });
       }, 3000);
+      router.push('/votes');
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || '登录失败，请重试';
       showMessage({
