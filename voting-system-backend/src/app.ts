@@ -47,7 +47,7 @@ app.get('/', (req, res) => {
 
 // API 路由
 app.use('/api/auth', authRoutes);
-app.use('/api/votes', pollRoutes);
+app.use('/api/polls', pollRoutes);
 
 // 连接数据库
 connectMongoDB();

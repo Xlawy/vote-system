@@ -24,15 +24,19 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { zhCN } from 'date-fns/locale';
 
 interface VoteOption {
-  content: string;
+  text: string;
   description: string;
 }
 
 interface CreateVoteForm {
   title: string;
   description: string;
+  type: 'single' | 'multiple';
+  startTime: Date;
   endTime: Date;
   isExpertVote: boolean;
+  maxChoices?: number;
+  expertWeight: number;
   options: VoteOption[];
 }
 
@@ -42,18 +46,32 @@ export default function CreateVotePage() {
   const [form, setForm] = useState<CreateVoteForm>({
     title: '',
     description: '',
+    type: 'single',
+    startTime: new Date(),
     endTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // 默认24小时后
     isExpertVote: false,
+    expertWeight: 2,
     options: [
-      { content: '', description: '' },
-      { content: '', description: '' }
+      { text: '', description: '' },
+      { text: '', description: '' }
     ]
   });
 
   // 创建投票的mutation
   const createVoteMutation = useMutation({
     mutationFn: async (data: CreateVoteForm) => {
-      const response = await axios.post('/api/votes', data);
+      // 将选项中的content改为text
+      const formattedData = {
+        ...data,
+        options: data.options.map(opt => ({
+          text: opt.text,
+          description: opt.description
+        })),
+        expertVoters: [], // 暂时不支持选择专家
+        startTime: data.startTime.toISOString(),
+        endTime: data.endTime.toISOString()
+      };
+      const response = await axios.post('/api/polls', formattedData);
       return response.data;
     },
     onSuccess: () => {
@@ -65,7 +83,7 @@ export default function CreateVotePage() {
   const addOption = () => {
     setForm(prev => ({
       ...prev,
-      options: [...prev.options, { content: '', description: '' }]
+      options: [...prev.options, { text: '', description: '' }]
     }));
   };
 
@@ -101,7 +119,7 @@ export default function CreateVotePage() {
       alert('请输入投票描述');
       return;
     }
-    if (form.options.some(opt => !opt.content.trim())) {
+    if (form.options.some(opt => !opt.text.trim())) {
       alert('请填写所有选项内容');
       return;
     }
@@ -196,8 +214,8 @@ export default function CreateVotePage() {
                   <Stack spacing={2} sx={{ flex: 1 }}>
                     <TextField
                       label={`选项 ${index + 1}`}
-                      value={option.content}
-                      onChange={(e) => updateOption(index, 'content', e.target.value)}
+                      value={option.text}
+                      onChange={(e) => updateOption(index, 'text', e.target.value)}
                       fullWidth
                       required
                     />

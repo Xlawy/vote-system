@@ -35,7 +35,7 @@ export default function VotesPage() {
     queryKey: ['votes'],
     queryFn: async () => {
       try {
-        const response = await axios.get('/api/votes');
+        const response = await axios.get('/api/polls');
         return response.data;
       } catch (error) {
         throw new Error('获取投票列表失败');

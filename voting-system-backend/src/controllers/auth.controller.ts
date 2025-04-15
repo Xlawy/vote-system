@@ -11,7 +11,7 @@ const SALT_ROUNDS = 10;
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, name, role } = req.body as RegisterRequest;
+    const { email, password, username, role } = req.body as RegisterRequest;
 
     // 检查用户是否已存在
     const existingUser = await User.findOne({ email });
@@ -27,7 +27,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const user: IUser = new User({
       email,
       password, // 密码会在 pre save 中间件中自动加密
-      name,
+      username,
       role: role || UserRole.NORMAL,
       isEmailVerified: false,
     });
@@ -59,7 +59,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       user: {
         id: userId,
         email: user.email,
-        name: user.name,
+        username: user.username,
         role: user.role,
       },
     };
@@ -123,7 +123,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       user: {
         id: userId,
         email: user.email,
-        name: user.name,
+        username: user.username,
         role: user.role,
       },
     };
@@ -172,7 +172,7 @@ export const getCurrentUser = async (req: Request, res: Response): Promise<void>
       user: {
         id: user._id.toString(),
         email: user.email,
-        name: user.name,
+        username: user.username,
         role: user.role,
       },
     } as const;

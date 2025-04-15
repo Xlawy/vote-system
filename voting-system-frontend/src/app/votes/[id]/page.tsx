@@ -51,7 +51,7 @@ export default function VoteDetailPage() {
     queryKey: ['vote', id],
     queryFn: async () => {
       try {
-        const response = await axios.get(`/api/votes/${id}`);
+        const response = await axios.get(`/api/polls/${id}`);
         return response.data;
       } catch (error) {
         throw new Error('获取投票详情失败');
@@ -62,7 +62,7 @@ export default function VoteDetailPage() {
   // 提交投票
   const voteMutation = useMutation({
     mutationFn: async (optionId: string) => {
-      const response = await axios.post(`/api/votes/${id}/vote`, {
+      const response = await axios.post(`/api/polls/${id}/vote`, {
         optionId,
       });
       return response.data;

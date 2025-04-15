@@ -4,7 +4,7 @@ import { UserRole } from '../models/user.model';
 export interface UserInfo {
   id: string;
   email: string;
-  name: string;
+  username: string;
   role: UserRole;
 }
 
