@@ -6,7 +6,7 @@ export const registerSchema = z.object({
   email: z.string().email('邮箱格式不正确'),
   password: z.string().min(6, '密码至少6个字符'),
   username: z.string().min(2, '用户名至少2个字符'),
-  role: z.enum([UserRole.NORMAL, UserRole.EXPERT], {
+  role: z.enum([UserRole.NORMAL, UserRole.EXPERT, UserRole.ADMIN, UserRole.SUPER_ADMIN], {
     errorMap: () => ({ message: '无效的用户角色' }),
   }).optional(),
 });

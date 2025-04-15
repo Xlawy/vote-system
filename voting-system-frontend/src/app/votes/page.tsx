@@ -29,9 +29,13 @@ export default function VotesPage() {
   const { user } = useAuth();
   const router = useRouter();
   const isAdmin = user?.role === 'admin' || user?.role === 'superAdmin';
+  
+  // 添加调试信息
+  console.log('当前用户信息:', user);
+  console.log('是否为管理员:', isAdmin);
 
   // 获取投票列表
-  const { data: votes, isLoading, error } = useQuery<Vote[]>({
+  const { data: votes = [], isLoading, error } = useQuery<Vote[]>({
     queryKey: ['votes'],
     queryFn: async () => {
       try {
@@ -51,87 +55,81 @@ export default function VotesPage() {
     );
   }
 
-  if (error || !votes) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="error">加载投票列表失败</Alert>
-      </Box>
-    );
-  }
-
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', p: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1">
           投票列表
         </Typography>
         {isAdmin && (
           <Button
             variant="contained"
-            color="primary"
-            onClick={() => router.push('/votes/create')}
             startIcon={<AddIcon />}
+            onClick={() => router.push('/votes/create')}
           >
-            创建新投票
+            创建投票
           </Button>
         )}
       </Box>
 
-      <Box sx={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
-        gap: 3
-      }}>
-        {votes.map((vote) => (
-          <Card key={vote.id}>
-            <CardHeader
-              title={vote.title}
-              action={
-                <Chip
-                  label={vote.status === 'upcoming' ? '即将开始' : 
-                         vote.status === 'active' ? '进行中' : '已结束'}
-                  color={vote.status === 'upcoming' ? 'primary' : 
-                         vote.status === 'active' ? 'success' : 'default'}
-                  variant="outlined"
-                />
-              }
-            />
-            <CardContent>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {vote.description}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  截止时间: {new Date(vote.endTime).toLocaleString()}
+      {error ? (
+        <Alert severity="error">
+          加载投票列表失败
+        </Alert>
+      ) : votes && votes.length > 0 ? (
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 3 }}>
+          {votes.map((vote) => (
+            <Card
+              key={vote.id}
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                cursor: 'pointer',
+                '&:hover': {
+                  boxShadow: 6,
+                },
+              }}
+              onClick={() => router.push(`/votes/${vote.id}`)}
+            >
+              <CardHeader
+                title={vote.title}
+                subheader={new Date(vote.endTime).toLocaleString('zh-CN')}
+              />
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  {vote.description}
                 </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Chip
+                    label={vote.status === 'active' ? '进行中' : vote.status === 'upcoming' ? '未开始' : '已结束'}
+                    color={vote.status === 'active' ? 'success' : vote.status === 'upcoming' ? 'primary' : 'default'}
+                    size="small"
+                  />
                   {vote.isExpertVote && (
                     <Chip
                       label="专家投票"
-                      color="warning"
-                      variant="outlined"
+                      color="secondary"
                       size="small"
-                      sx={{ mr: 1 }}
                     />
                   )}
-                  <Typography variant="body2" color="text.secondary" component="span">
-                    总票数: {vote.totalVotes}
-                  </Typography>
+                  <Chip
+                    label={`${vote.totalVotes} 票`}
+                    variant="outlined"
+                    size="small"
+                  />
                 </Box>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => router.push(`/votes/${vote.id}`)}
-                >
-                  查看详情
-                </Button>
-              </Box>
-            </CardContent>
-          </Card>
-        ))}
-      </Box>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+      ) : (
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <Typography variant="body1" color="text.secondary">
+            暂无投票
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 }

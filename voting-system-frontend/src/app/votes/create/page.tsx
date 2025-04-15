@@ -18,10 +18,11 @@ import Stack from '@mui/material/Stack';
 import { Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import { useAuth } from '@/hooks/useAuth';
 import axios from '@/lib/axios';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { zhCN } from 'date-fns/locale';
+import dayjs from 'dayjs';
+import 'dayjs/locale/zh-cn';
 
 interface VoteOption {
   text: string;
@@ -32,8 +33,8 @@ interface CreateVoteForm {
   title: string;
   description: string;
   type: 'single' | 'multiple';
-  startTime: Date;
-  endTime: Date;
+  startTime: dayjs.Dayjs;
+  endTime: dayjs.Dayjs;
   isExpertVote: boolean;
   maxChoices?: number;
   expertWeight: number;
@@ -47,8 +48,8 @@ export default function CreateVotePage() {
     title: '',
     description: '',
     type: 'single',
-    startTime: new Date(),
-    endTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // 默认24小时后
+    startTime: dayjs(),
+    endTime: dayjs().add(24, 'hour'), // 默认24小时后
     isExpertVote: false,
     expertWeight: 2,
     options: [
@@ -123,7 +124,7 @@ export default function CreateVotePage() {
       alert('请填写所有选项内容');
       return;
     }
-    if (form.endTime <= new Date()) {
+    if (form.endTime.isBefore(dayjs())) {
       alert('结束时间必须晚于当前时间');
       return;
     }
@@ -174,34 +175,96 @@ export default function CreateVotePage() {
                 required
               />
 
-              <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={zhCN}>
-                <DateTimePicker
-                  label="结束时间"
-                  value={form.endTime}
-                  onChange={(newValue) => {
-                    if (newValue) {
-                      setForm(prev => ({ ...prev, endTime: newValue }));
-                    }
-                  }}
-                  disablePast
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      required: true
-                    }
-                  }}
-                />
+              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="zh-cn">
+                <Stack spacing={2}>
+                  <DateTimePicker
+                    label="开始时间"
+                    value={form.startTime}
+                    onChange={(newValue) => {
+                      if (newValue) {
+                        setForm(prev => ({ ...prev, startTime: newValue }));
+                      }
+                    }}
+                    disablePast
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        required: true
+                      }
+                    }}
+                  />
+                  <DateTimePicker
+                    label="结束时间"
+                    value={form.endTime}
+                    onChange={(newValue) => {
+                      if (newValue) {
+                        setForm(prev => ({ ...prev, endTime: newValue }));
+                      }
+                    }}
+                    minDateTime={form.startTime}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        required: true
+                      }
+                    }}
+                  />
+                </Stack>
               </LocalizationProvider>
 
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={form.isExpertVote}
-                    onChange={(e) => setForm(prev => ({ ...prev, isExpertVote: e.target.checked }))}
-                  />
-                }
-                label="专家投票"
-              />
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={form.type === 'multiple'}
+                      onChange={(e) => setForm(prev => ({
+                        ...prev,
+                        type: e.target.checked ? 'multiple' : 'single',
+                        maxChoices: e.target.checked ? 2 : undefined
+                      }))}
+                    />
+                  }
+                  label="多选投票"
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={form.isExpertVote}
+                      onChange={(e) => setForm(prev => ({ ...prev, isExpertVote: e.target.checked }))}
+                    />
+                  }
+                  label="专家投票"
+                />
+              </Box>
+
+              {form.type === 'multiple' && (
+                <TextField
+                  type="number"
+                  label="最大选择数"
+                  value={form.maxChoices}
+                  onChange={(e) => setForm(prev => ({
+                    ...prev,
+                    maxChoices: parseInt(e.target.value) || 2
+                  }))}
+                  inputProps={{ min: 2, max: form.options.length }}
+                  fullWidth
+                />
+              )}
+
+              {form.isExpertVote && (
+                <TextField
+                  type="number"
+                  label="专家权重"
+                  value={form.expertWeight}
+                  onChange={(e) => setForm(prev => ({
+                    ...prev,
+                    expertWeight: parseInt(e.target.value) || 2
+                  }))}
+                  inputProps={{ min: 1, max: 10 }}
+                  fullWidth
+                  helperText="专家投票的权重（1-10）"
+                />
+              )}
 
               <Divider />
 
