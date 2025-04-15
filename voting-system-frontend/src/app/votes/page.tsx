@@ -19,6 +19,7 @@ interface Vote {
   id: string;
   title: string;
   description: string;
+  startTime: string;
   endTime: string;
   status: 'upcoming' | 'active' | 'ended';
   totalVotes: number;
@@ -94,7 +95,16 @@ export default function VotesPage() {
             >
               <CardHeader
                 title={vote.title}
-                subheader={new Date(vote.endTime).toLocaleString('zh-CN')}
+                subheader={
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      开始：{new Date(vote.startTime).toLocaleString('zh-CN')}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      结束：{new Date(vote.endTime).toLocaleString('zh-CN')}
+                    </Typography>
+                  </Box>
+                }
               />
               <CardContent sx={{ flexGrow: 1 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

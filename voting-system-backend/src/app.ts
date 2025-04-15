@@ -7,6 +7,7 @@ import { Server } from 'socket.io';
 import { connectMongoDB, closeConnections, redis } from './config/db';
 import authRoutes from './routes/auth.routes';
 import pollRoutes from './routes/poll.routes';
+import { updatePollStatus } from './jobs/update-poll-status';
 
 const app = express();
 const httpServer = createServer(app);
@@ -48,6 +49,9 @@ app.get('/', (req, res) => {
 // API 路由
 app.use('/api/auth', authRoutes);
 app.use('/api/polls', pollRoutes);
+
+// 设置定时任务，每分钟检查一次投票状态
+setInterval(updatePollStatus, 60 * 1000);
 
 // 连接数据库
 connectMongoDB();

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Snackbar from '@mui/material/Snackbar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -32,6 +33,7 @@ interface VoteDetail {
   title: string;
   description: string;
   options: VoteOption[];
+  startTime: string;
   endTime: string;
   status: 'upcoming' | 'active' | 'ended';
   totalVotes: number;
@@ -44,6 +46,8 @@ export default function VoteDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const [selectedOption, setSelectedOption] = useState<string>('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
   const queryClient = useQueryClient();
 
   // 获取投票详情
@@ -63,12 +67,25 @@ export default function VoteDetailPage() {
   const voteMutation = useMutation({
     mutationFn: async (optionId: string) => {
       const response = await axios.post(`/api/polls/${id}/vote`, {
-        optionId,
+        selectedOptions: [optionId],
       });
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vote', id] });
+      setSnackbarMessage('投票成功！');
+      setSnackbarOpen(true);
+    },
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage === '您已经投过票了') {
+        setSnackbarMessage('您已经投过一票了');
+      } else if (errorMessage === '投票未开始或已结束') {
+        setSnackbarMessage('当前投票未开始或已结束');
+      } else {
+        setSnackbarMessage(errorMessage || '投票失败，请重试');
+      }
+      setSnackbarOpen(true);
     },
   });
 
@@ -192,9 +209,14 @@ export default function VoteDetailPage() {
           </FormControl>
 
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              截止时间: {new Date(vote.endTime).toLocaleString()}
-            </Typography>
+            <Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                开始时间: {new Date(vote.startTime).toLocaleString()}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                截止时间: {new Date(vote.endTime).toLocaleString()}
+              </Typography>
+            </Box>
             <Box>
               <Typography variant="body2" color="text.secondary" sx={{ display: 'inline', mr: 2 }}>
                 总投票数: {vote.totalVotes}
@@ -220,6 +242,12 @@ export default function VoteDetailPage() {
           )}
         </CardContent>
       </Card>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMessage}
+      />
     </Box>
   );
 }

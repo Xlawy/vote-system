@@ -9,8 +9,9 @@ export const validateRequest = (schema: AnyZodObject) => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
+        const firstError = error.errors[0];
         const errorResponse: ErrorResponse = {
-          message: '请求参数验证失败',
+          message: firstError.message,
           errors: {},
         };
         
@@ -21,6 +22,9 @@ export const validateRequest = (schema: AnyZodObject) => {
           }
           errorResponse.errors![path].push(err.message);
         });
+        
+        console.log('请求体:', req.body);
+        console.log('验证错误:', errorResponse);
         
         res.status(400).json(errorResponse);
         return;

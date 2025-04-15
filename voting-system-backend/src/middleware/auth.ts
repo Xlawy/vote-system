@@ -14,8 +14,8 @@ export const auth = (roles?: UserRole[]): express.RequestHandler => {
         return;
       }
 
-      const decoded = jwt.verify(token, JWT_SECRET) as { id: string, role: UserRole };
-      const user = await User.findById(decoded.id);
+      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string, role: UserRole };
+      const user = await User.findById(decoded.userId);
       if (!user) {
         next(new Error('用户不存在'));
         return;

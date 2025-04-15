@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
+import mongoose, { isValidObjectId } from 'mongoose';
 import { Poll, IPoll, PollStatus } from '../models/poll.model';
 import { Vote } from '../models/vote.model';
-import { isValidObjectId } from 'mongoose';
 
 export class PollController {
   // 获取投票列表
@@ -29,6 +29,7 @@ export class PollController {
         id: poll._id,
         title: poll.title,
         description: poll.description,
+        startTime: poll.startTime,
         endTime: poll.endTime,
         status: poll.status === PollStatus.NOT_STARTED ? 'upcoming' :
                 poll.status === PollStatus.IN_PROGRESS ? 'active' : 'ended',
@@ -116,10 +117,31 @@ export class PollController {
         return;
       }
 
+      // 为每个选项生成唯一ID
+      const options = req.body.options.map((option: { text: string; description?: string; imageUrl?: string; }) => ({
+        ...option,
+        id: new mongoose.Types.ObjectId().toString(),
+        normalVotes: 0,
+        expertVotes: 0
+      }));
+
+      // 根据开始时间和结束时间设置状态
+      const now = new Date();
+      const startTime = new Date(req.body.startTime);
+      const endTime = new Date(req.body.endTime);
+      
+      let status = PollStatus.NOT_STARTED;
+      if (now >= startTime && now < endTime) {
+        status = PollStatus.IN_PROGRESS;
+      } else if (now >= endTime) {
+        status = PollStatus.ENDED;
+      }
+
       const pollData = {
         ...req.body,
+        options,
         creator: userId,
-        status: PollStatus.NOT_STARTED
+        status
       };
 
       const poll = new Poll(pollData);

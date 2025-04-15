@@ -50,7 +50,11 @@ export const authApi = {
     name: string;
     role: string;
   }) => {
-    const response = await api.post('/auth/register', userData);
+    const { name, ...rest } = userData;
+    const response = await api.post('/auth/register', {
+      ...rest,
+      username: name,
+    });
     return response.data;
   },
 
