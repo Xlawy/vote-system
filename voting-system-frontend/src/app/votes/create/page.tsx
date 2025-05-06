@@ -75,7 +75,7 @@ export default function CreateVotePage() {
         startTime: data.startTime.toISOString(),
         endTime: data.endTime.toISOString()
       };
-      const response = await axios.post('/api/polls', formattedData);
+      const response = await axios.post('/polls', formattedData);
       return response.data;
     },
     onSuccess: () => {
@@ -116,7 +116,7 @@ export default function CreateVotePage() {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await axios.post('/api/upload', formData, {
+      const response = await axios.post('/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

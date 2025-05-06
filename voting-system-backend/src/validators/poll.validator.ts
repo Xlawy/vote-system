@@ -63,7 +63,7 @@ export const updatePollSchema = z.object({
     endTime: z.string().datetime('结束时间格式无效').optional(),
     maxChoices: z.number().int().positive().optional(),
     expertWeight: z.number().min(1).max(10).optional(),
-    banner: z.string().url('banner图片URL格式无效').optional()
+    banner: z.string().regex(/^\/uploads\/.+/, 'banner图片路径格式无效').optional()
   }).refine(data => {
     if (data.startTime && data.endTime) {
       const start = new Date(data.startTime);

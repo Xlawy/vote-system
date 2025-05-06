@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import axios from 'axios';
+import axios from '@/lib/axios';
 
 export interface ImageUploadProps {
   value?: string;
@@ -26,18 +26,26 @@ export const ImageUpload = ({
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await axios.post('/api/upload', formData, {
+      const response = await axios.post('/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
+      // 直接使用服务器返回的相对路径
       onChange(response.data.url);
     } catch (error) {
       console.error('上传失败:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // 在显示图片时使用完整URL
+  const getImageUrl = (path?: string) => {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return `http://localhost:8000${path}`;
   };
 
   return (
@@ -58,9 +66,13 @@ export const ImageUpload = ({
       {value && (
         <div className="relative w-full h-48">
           <img
-            src={value}
+            src={getImageUrl(value)}
             alt="Uploaded"
             className="object-cover w-full h-full rounded-md"
+            onError={(e) => {
+              console.error('图片加载失败:', value);
+              e.currentTarget.style.display = 'none';
+            }}
           />
         </div>
       )}
