@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import Snackbar from '@mui/material/Snackbar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -16,14 +17,15 @@ import FormLabel from '@mui/material/FormLabel';
 import Chip from '@mui/material/Chip';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
+import EditIcon from '@mui/icons-material/Edit';
 import { useAuth } from '@/hooks/useAuth';
 import axios from '@/lib/axios';
 import { useParams } from 'next/navigation';
 
 interface VoteOption {
     id: string;
-    content: string;
-    description?: string;
+    text: string;
+    imageUrl?: string;
     votes: number;
     percentage: number;
 }
@@ -45,6 +47,7 @@ interface VoteDetail {
 
 export default function VoteDetailPage() {
     const { id } = useParams();
+    const router = useRouter();
     const { user } = useAuth();
     const [selectedOption, setSelectedOption] = useState<string>('');
     const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -55,7 +58,7 @@ export default function VoteDetailPage() {
     const { data, isLoading, error } = useQuery({
         queryKey: ['vote', id],
         queryFn: async () => {
-            const response = await axios.get(`/api/polls/${id}`);
+            const response = await axios.get(`/polls/${id}`);
             return response.data;
         },
     });
@@ -67,7 +70,7 @@ export default function VoteDetailPage() {
     // 提交投票
     const voteMutation = useMutation({
         mutationFn: async (optionId: string) => {
-            const response = await axios.post(`/api/polls/${id}/vote`, {
+            const response = await axios.post(`/polls/${id}/vote`, {
                 selectedOptions: [optionId],
             });
             return response.data;
@@ -99,6 +102,10 @@ export default function VoteDetailPage() {
         } catch (error) {
             console.error('投票失败:', error);
         }
+    };
+
+    const handleEditClick = () => {
+        router.push(`/votes/edit/${id}`);
     };
 
     if (isLoading) {
@@ -154,13 +161,24 @@ export default function VoteDetailPage() {
                         <Typography variant="h4" component="h1">
                             {data.title}
                         </Typography>
-                        <Chip
-                            label={data.status === 'upcoming' ? '即将开始' :
-                                data.status === 'active' ? '进行中' : '已结束'}
-                            color={data.status === 'upcoming' ? 'primary' :
-                                data.status === 'active' ? 'success' : 'default'}
-                            variant="outlined"
-                        />
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                            {user?.role === 'admin' && (
+                                <Button
+                                    variant="outlined"
+                                    startIcon={<EditIcon />}
+                                    onClick={handleEditClick}
+                                >
+                                    编辑投票
+                                </Button>
+                            )}
+                            <Chip
+                                label={data.status === 'upcoming' ? '即将开始' :
+                                    data.status === 'active' ? '进行中' : '已结束'}
+                                color={data.status === 'upcoming' ? 'primary' :
+                                    data.status === 'active' ? 'success' : 'default'}
+                                variant="outlined"
+                            />
+                        </Box>
                     </Box>
 
                     <Typography color="text.secondary" paragraph>
@@ -182,7 +200,7 @@ export default function VoteDetailPage() {
                             value={selectedOption}
                             onChange={(e) => setSelectedOption(e.target.value)}
                         >
-                            {data.options.map((option) => (
+                            {data.options.map((option: VoteOption) => (
                                 <Box
                                     key={option.id}
                                     sx={{
@@ -195,13 +213,15 @@ export default function VoteDetailPage() {
                                         value={option.id}
                                         control={<Radio />}
                                         label={
-                                            <Box>
-                                                <Typography variant="body1">{option.content}</Typography>
-                                                {option.description && (
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        {option.description}
-                                                    </Typography>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                {option.imageUrl && (
+                                                    <img
+                                                        src={option.imageUrl}
+                                                        alt={option.text}
+                                                        style={{ width: 100, height: 100, objectFit: 'cover' }}
+                                                    />
                                                 )}
+                                                <Typography>{option.text}</Typography>
                                             </Box>
                                         }
                                         sx={{ width: '100%' }}

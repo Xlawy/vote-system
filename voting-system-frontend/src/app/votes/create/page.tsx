@@ -184,7 +184,7 @@ export default function CreateVotePage() {
             <Stack spacing={3}>
               <Box>
                 <Typography variant="subtitle1" gutterBottom>
-                  投票Banner
+                  投票Banner图设置
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                   <Button
@@ -192,7 +192,7 @@ export default function CreateVotePage() {
                     component="label"
                     startIcon={<AddIcon />}
                   >
-                    上传Banner
+                    上传图片
                     <input
                       type="file"
                       hidden

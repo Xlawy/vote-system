@@ -84,6 +84,15 @@ app.use('/api/auth', authRoutes);
 app.use('/api/polls', pollRoutes);
 app.use('/api/upload', uploadRoutes);
 
+// 错误处理中间件
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('错误:', err);
+  res.status(500).json({
+    status: 'error',
+    message: err.message || '服务器内部错误'
+  });
+});
+
 // 设置定时任务，每分钟检查一次投票状态
 setInterval(updatePollStatus, 60 * 1000);
 

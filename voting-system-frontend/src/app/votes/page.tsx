@@ -12,7 +12,7 @@ import AddIcon from '@mui/icons-material/Add';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import { useAuth } from '@/hooks/useAuth';
-import axios from '@/lib/axios';
+import axios, { isAxiosError } from '@/lib/axios';
 import { useRouter } from 'next/navigation';
 
 interface Vote {
@@ -40,9 +40,19 @@ export default function VotesPage() {
     queryKey: ['votes'],
     queryFn: async () => {
       try {
-        const response = await axios.get('/api/polls');
+        console.log('正在获取投票列表...');
+        const response = await axios.get('/polls');
+        console.log('获取投票列表成功:', response.data);
         return response.data;
-      } catch (error) {
+      } catch (error: unknown) {
+        console.error('获取投票列表失败:', error);
+        if (isAxiosError(error)) {
+          console.error('错误详情:', {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message
+          });
+        }
         throw new Error('获取投票列表失败');
       }
     },

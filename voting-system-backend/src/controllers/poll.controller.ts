@@ -77,7 +77,7 @@ export class PollController {
                 type: poll.type,
                 options: poll.options.map(option => ({
                     id: option.id,
-                    content: option.text,
+                    text: option.text,
                     description: option.description,
                     imageUrl: option.imageUrl,
                     votes: option.normalVotes + option.expertVotes,
@@ -231,6 +231,61 @@ export class PollController {
             return;
         } catch (error) {
             console.error('提交投票失败:', error);
+            next(error);
+            return;
+        }
+    }
+
+    // 更新投票
+    static updatePoll = async (req: Request & { user?: any }, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const userId = req.user?._id;
+            if (!userId) {
+                next(new Error('未授权'));
+                return;
+            }
+
+            const { id } = req.params;
+            if (!isValidObjectId(id)) {
+                next(new Error('无效的投票ID'));
+                return;
+            }
+
+            // 检查投票是否存在且属于当前用户
+            const poll = await Poll.findOne({ _id: id, creator: userId, isDeleted: false });
+            if (!poll) {
+                next(new Error('投票不存在或无权修改'));
+                return;
+            }
+
+            // 如果投票已经开始，只允许修改部分字段
+            if (poll.status !== PollStatus.NOT_STARTED) {
+                const allowedFields = ['description', 'banner'];
+                const updateData: any = {};
+                for (const field of allowedFields) {
+                    if (req.body[field] !== undefined) {
+                        updateData[field] = req.body[field];
+                    }
+                }
+                await Poll.updateOne({ _id: id }, updateData);
+            } else {
+                // 如果投票未开始，可以修改所有字段
+                const updateData = {
+                    ...req.body,
+                    options: req.body.options?.map((option: any) => ({
+                        ...option,
+                        normalVotes: 0,
+                        expertVotes: 0
+                    }))
+                };
+                await Poll.updateOne({ _id: id }, updateData);
+            }
+
+            const updatedPoll = await Poll.findById(id);
+            res.json(updatedPoll);
+            return;
+        } catch (error) {
+            console.error('更新投票失败:', error);
             next(error);
             return;
         }

@@ -3,7 +3,7 @@ import { PollController } from '../controllers/poll.controller';
 import { auth } from '../middleware/auth';
 import { UserRole } from '../models/user.model';
 import { validateRequest } from '../middleware/validate';
-import { createPollSchema, submitVoteSchema } from '../validators/poll.validator';
+import { createPollSchema, submitVoteSchema, updatePollSchema } from '../validators/poll.validator';
 
 const router = express.Router();
 
@@ -32,6 +32,13 @@ router.post('/:id/vote',
   auth(), 
   validateRequest(submitVoteSchema), 
   asyncHandler(PollController.submitVote)
+);
+
+// 更新投票（需要管理员权限）
+router.put('/:id', 
+  auth([UserRole.ADMIN, UserRole.SUPER_ADMIN]), 
+  validateRequest(updatePollSchema), 
+  asyncHandler(PollController.updatePoll)
 );
 
 export default router;

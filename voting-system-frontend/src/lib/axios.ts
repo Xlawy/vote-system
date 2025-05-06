@@ -1,7 +1,7 @@
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 
 const instance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -31,9 +31,9 @@ instance.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      // 清除 token 并重定向到登录页
+      // 未授权，清除token并跳转到登录页
       localStorage.removeItem('token');
-      window.location.href = '/auth/login';
+      window.location.href = '/login';
     } else if (error.response?.status === 403) {
       // 权限不足
       console.error('权限不足');
@@ -54,4 +54,5 @@ instance.interceptors.response.use(
   }
 );
 
+export { isAxiosError };
 export default instance;
