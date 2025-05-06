@@ -23,6 +23,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
+import { toast } from 'react-hot-toast';
 
 interface VoteOption {
   text: string;
@@ -39,6 +40,7 @@ interface CreateVoteForm {
   maxChoices?: number;
   expertWeight: number;
   options: VoteOption[];
+  banner?: string;
 }
 
 export default function CreateVotePage() {
@@ -55,7 +57,8 @@ export default function CreateVotePage() {
     options: [
       { text: '', description: '' },
       { text: '', description: '' }
-    ]
+    ],
+    banner: undefined
   });
 
   // 创建投票的mutation
@@ -105,6 +108,28 @@ export default function CreateVotePage() {
         i === index ? { ...option, [field]: value } : option
       )
     }));
+  };
+
+  // 处理banner上传
+  const handleBannerUpload = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await axios.post('/api/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      // 使用相对路径
+      const imageUrl = response.data.url;
+      console.log('上传的图片URL:', imageUrl);
+      setForm(prev => ({ ...prev, banner: imageUrl }));
+    } catch (error) {
+      console.error('上传图片失败:', error);
+      toast.error('上传图片失败');
+    }
   };
 
   // 表单提交
@@ -157,6 +182,48 @@ export default function CreateVotePage() {
 
           <form onSubmit={handleSubmit}>
             <Stack spacing={3}>
+              <Box>
+                <Typography variant="subtitle1" gutterBottom>
+                  投票Banner
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    startIcon={<AddIcon />}
+                  >
+                    上传Banner
+                    <input
+                      type="file"
+                      hidden
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          handleBannerUpload(e.target.files[0]);
+                        }
+                      }}
+                    />
+                  </Button>
+                  {form.banner && (
+                    <Box
+                      sx={{
+                        width: 200,
+                        height: 100,
+                        borderRadius: 1,
+                        overflow: 'hidden',
+                        '& img': {
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }
+                      }}
+                    >
+                      <img src={form.banner} alt="Banner preview" />
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+
               <TextField
                 label="投票标题"
                 value={form.title}

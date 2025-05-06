@@ -37,6 +37,7 @@ export interface IPoll extends Document {
   maxChoices?: number;                      // 多选时的最大选择数
   expertWeight: number;                     // 专家票权重
   isDeleted: boolean;
+  banner?: string;                          // 投票banner图片URL
   createdAt: Date;
   updatedAt: Date;
 }
@@ -116,6 +117,10 @@ const pollSchema = new Schema<IPoll>({
   isDeleted: {
     type: Boolean,
     default: false
+  },
+  banner: {
+    type: String,
+    trim: true
   }
 }, {
   timestamps: true

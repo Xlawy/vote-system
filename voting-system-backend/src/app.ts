@@ -7,7 +7,10 @@ import { Server } from 'socket.io';
 import { connectMongoDB, closeConnections, redis } from './config/db';
 import authRoutes from './routes/auth.routes';
 import pollRoutes from './routes/poll.routes';
+import uploadRoutes from './routes/upload.routes';
 import { updatePollStatus } from './jobs/update-poll-status';
+import path from 'path';
+import fs from 'fs';
 
 const app = express();
 const httpServer = createServer(app);
@@ -19,21 +22,51 @@ const io = new Server(httpServer, {
   }
 });
 
+// 创建上传目录
+const uploadDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // 安全中间件
 app.use(helmet());
 
 // CORS 配置
-app.use(cors({
+const corsOptions = {
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Authorization']
-}));
+};
+
+app.use(cors(corsOptions));
 
 // 请求体解析
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// 静态文件服务
+app.use('/uploads', (req, res, next) => {
+  // 设置 CORS 头
+  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // 处理预检请求
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  
+  next();
+}, express.static(uploadDir, {
+  setHeaders: (res) => {
+    res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+}));
 
 // 请求日志
 app.use((req, res, next) => {
@@ -49,6 +82,7 @@ app.get('/', (req, res) => {
 // API 路由
 app.use('/api/auth', authRoutes);
 app.use('/api/polls', pollRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // 设置定时任务，每分钟检查一次投票状态
 setInterval(updatePollStatus, 60 * 1000);
