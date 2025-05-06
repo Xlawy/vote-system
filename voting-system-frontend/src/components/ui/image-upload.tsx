@@ -41,13 +41,6 @@ export const ImageUpload = ({
     }
   };
 
-  // 在显示图片时使用完整URL
-  const getImageUrl = (path?: string) => {
-    if (!path) return '';
-    if (path.startsWith('http')) return path;
-    return `http://localhost:8000${path}`;
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
@@ -63,19 +56,6 @@ export const ImageUpload = ({
           disabled={isLoading}
         />
       </div>
-      {value && (
-        <div className="relative w-full h-48">
-          <img
-            src={getImageUrl(value)}
-            alt="Uploaded"
-            className="object-cover w-full h-full rounded-md"
-            onError={(e) => {
-              console.error('图片加载失败:', value);
-              e.currentTarget.style.display = 'none';
-            }}
-          />
-        </div>
-      )}
       {error && (
         <p className="text-sm text-red-500">{error}</p>
       )}

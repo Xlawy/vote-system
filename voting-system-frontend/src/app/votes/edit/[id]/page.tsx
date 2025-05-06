@@ -302,6 +302,24 @@ export default function EditPollPage() {
                   }}
                   error={errors.banner?.message}
                 />
+                {watch('banner') && (
+                  <Box sx={{ mt: 2, width: '100%', height: 200, position: 'relative' }}>
+                    <img
+                      src={watch('banner')?.startsWith('http') ? watch('banner') : `http://localhost:8000${watch('banner')}`}
+                      alt="Banner preview"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '8px'
+                      }}
+                      onError={(e) => {
+                        console.error('图片加载失败:', watch('banner'));
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </Box>
+                )}
               </Box>
 
               <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
