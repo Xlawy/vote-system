@@ -41,4 +41,16 @@ router.put('/:id',
   asyncHandler(PollController.updatePoll)
 );
 
+// 删除投票（需要管理员权限）
+router.delete('/:id', 
+  auth([UserRole.ADMIN, UserRole.SUPER_ADMIN]), 
+  asyncHandler(PollController.deletePoll)
+);
+
+// 提前关闭投票（需要管理员权限）
+router.post('/:id/close', 
+  auth([UserRole.ADMIN, UserRole.SUPER_ADMIN]), 
+  asyncHandler(PollController.closePoll)
+);
+
 export default router;

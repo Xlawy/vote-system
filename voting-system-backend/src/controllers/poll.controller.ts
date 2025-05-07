@@ -290,4 +290,83 @@ export class PollController {
             return;
         }
     }
+
+    // 删除投票
+    static deletePoll = async (req: Request & { user?: any }, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const userId = req.user?._id;
+            if (!userId) {
+                next(new Error('未授权'));
+                return;
+            }
+
+            const { id } = req.params;
+            if (!isValidObjectId(id)) {
+                next(new Error('无效的投票ID'));
+                return;
+            }
+
+            // 检查投票是否存在且属于当前用户
+            const poll = await Poll.findOne({ _id: id, creator: userId, isDeleted: false });
+            if (!poll) {
+                next(new Error('投票不存在或无权删除'));
+                return;
+            }
+
+            // 软删除投票
+            await Poll.updateOne({ _id: id }, { isDeleted: true });
+            res.json({ message: '投票已删除' });
+            return;
+        } catch (error) {
+            console.error('删除投票失败:', error);
+            next(error);
+            return;
+        }
+    }
+
+    // 提前关闭投票
+    static closePoll = async (req: Request & { user?: any }, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const userId = req.user?._id;
+            if (!userId) {
+                next(new Error('未授权'));
+                return;
+            }
+
+            const { id } = req.params;
+            if (!isValidObjectId(id)) {
+                next(new Error('无效的投票ID'));
+                return;
+            }
+
+            // 检查投票是否存在且属于当前用户
+            const poll = await Poll.findOne({ _id: id, creator: userId, isDeleted: false });
+            if (!poll) {
+                next(new Error('投票不存在或无权操作'));
+                return;
+            }
+
+            // 如果投票已经结束，则返回错误
+            if (poll.status === PollStatus.ENDED) {
+                next(new Error('投票已经结束'));
+                return;
+            }
+
+            // 更新投票状态为已结束
+            await Poll.updateOne(
+                { _id: id },
+                { 
+                    status: PollStatus.ENDED,
+                    endTime: new Date() // 将结束时间设置为当前时间
+                }
+            );
+
+            res.json({ message: '投票已提前关闭' });
+            return;
+        } catch (error) {
+            console.error('关闭投票失败:', error);
+            next(error);
+            return;
+        }
+    }
 }
