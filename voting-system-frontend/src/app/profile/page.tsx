@@ -113,17 +113,18 @@ export default function ProfilePage() {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <Container maxWidth="sm" sx={{ py: 4 }}>
       <Paper
         elevation={3}
         sx={{
-          p: 4,
+          p: { xs: 2, sm: 4 },
           borderRadius: 2,
           background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.95) 100%)',
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(255,255,255,0.3)',
         }}
       >
+        {/* 标题在头像上方 */}
         <Typography
           variant="h4"
           component="h1"
@@ -133,127 +134,130 @@ export default function ProfilePage() {
             background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            mb: 4,
+            mb: 3,
+            textAlign: 'center',
           }}
         >
           个人资料
         </Typography>
-
+        {/* 头像单独一行，最上面居中 */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+          <Box sx={{ position: 'relative' }}>
+            <Avatar
+              sx={{
+                width: 100,
+                height: 100,
+                bgcolor: 'primary.main',
+                fontSize: '3rem',
+              }}
+            >
+              {user?.username.charAt(0).toUpperCase()}
+            </Avatar>
+            <IconButton
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                bgcolor: 'background.paper',
+                '&:hover': { bgcolor: 'background.paper' },
+                boxShadow: 1,
+              }}
+            >
+              <PhotoCamera />
+            </IconButton>
+          </Box>
+        </Box>
         <Box component="form" onSubmit={handleSubmit} noValidate>
           <Grid container spacing={3}>
-            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-              <Box sx={{ position: 'relative' }}>
-                <Avatar
+            {/* 第二行：用户名和邮箱 */}
+            <Grid item xs={12}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="用户名"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    error={!!errors.username}
+                    helperText={errors.username}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="邮箱"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    error={!!errors.email}
+                    helperText={errors.email}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            {/* 第三行：密码修改 */}
+            <Grid item xs={12}>
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, textAlign: 'center' }}>
+                修改密码
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    label="当前密码"
+                    name="currentPassword"
+                    type="password"
+                    value={formData.currentPassword}
+                    onChange={handleChange}
+                    error={!!errors.currentPassword}
+                    helperText={errors.currentPassword}
+                  />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    label="新密码"
+                    name="newPassword"
+                    type="password"
+                    value={formData.newPassword}
+                    onChange={handleChange}
+                    error={!!errors.newPassword}
+                    helperText={errors.newPassword}
+                  />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    label="确认新密码"
+                    name="confirmPassword"
+                    type="password"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    error={!!errors.confirmPassword}
+                    helperText={errors.confirmPassword}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            {/* 第四行：保存按钮 */}
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
                   sx={{
-                    width: 100,
-                    height: 100,
-                    bgcolor: 'primary.main',
-                    fontSize: '2.5rem',
+                    width: 200,
+                    background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
+                    boxShadow: '0 3px 5px 2px rgba(33, 150, 243, .3)',
                   }}
                 >
-                  {user?.username.charAt(0).toUpperCase()}
-                </Avatar>
-                <IconButton
-                  sx={{
-                    position: 'absolute',
-                    bottom: 0,
-                    right: 0,
-                    bgcolor: 'background.paper',
-                    '&:hover': { bgcolor: 'background.paper' },
-                  }}
-                >
-                  <PhotoCamera />
-                </IconButton>
+                  保存修改
+                </Button>
               </Box>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="用户名"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                error={!!errors.username}
-                helperText={errors.username}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="邮箱"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                error={!!errors.email}
-                helperText={errors.email}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Divider sx={{ my: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  修改密码
-                </Typography>
-              </Divider>
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="当前密码"
-                name="currentPassword"
-                type="password"
-                value={formData.currentPassword}
-                onChange={handleChange}
-                error={!!errors.currentPassword}
-                helperText={errors.currentPassword}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="新密码"
-                name="newPassword"
-                type="password"
-                value={formData.newPassword}
-                onChange={handleChange}
-                error={!!errors.newPassword}
-                helperText={errors.newPassword}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="确认新密码"
-                name="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                error={!!errors.confirmPassword}
-                helperText={errors.confirmPassword}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                fullWidth
-                sx={{
-                  mt: 2,
-                  height: 48,
-                  background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
-                  boxShadow: '0 3px 5px 2px rgba(33, 150, 243, .3)',
-                }}
-              >
-                保存修改
-              </Button>
             </Grid>
           </Grid>
         </Box>
