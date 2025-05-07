@@ -23,8 +23,10 @@ import {
   DialogContentText,
   DialogActions,
   Container,
+  Snackbar,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useAuth } from '@/hooks/useAuth';
 import axios from '@/lib/axios';
 
@@ -145,10 +147,13 @@ export default function VoteDetailPage() {
       setIsClosing(true);
       await axios.post(`/polls/${id}/close`);
       // 刷新投票数据
-      await queryClient.invalidateQueries({ queryKey: ['poll', id] });
+      await queryClient.invalidateQueries({ queryKey: ['vote', id] });
+      setSnackbarMessage('投票已成功关闭');
+      setSnackbarOpen(true);
     } catch (error) {
       console.error('关闭投票失败:', error);
-      alert('关闭投票失败');
+      setSnackbarMessage('关闭投票失败');
+      setSnackbarOpen(true);
     } finally {
       setIsClosing(false);
       setCloseDialogOpen(false);
@@ -176,6 +181,15 @@ export default function VoteDetailPage() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
+        {/* 返回按钮 */}
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => router.push('/votes')}
+          sx={{ mb: 2 }}
+        >
+          返回投票列表
+        </Button>
+
         {bannerUrl && (
           <Box
             sx={{
@@ -405,6 +419,22 @@ export default function VoteDetailPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* 添加 Snackbar 组件 */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setSnackbarOpen(false)} 
+          severity={snackbarMessage.includes('失败') ? 'error' : 'success'}
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

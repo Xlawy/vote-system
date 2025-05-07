@@ -33,7 +33,13 @@ instance.interceptors.response.use(
     if (error.response?.status === 401) {
       // 未授权，清除token并跳转到登录页
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      // 使用 router 进行导航，而不是直接修改 window.location
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/login') {
+          window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
+        }
+      }
     } else if (error.response?.status === 403) {
       // 权限不足
       console.error('权限不足');
