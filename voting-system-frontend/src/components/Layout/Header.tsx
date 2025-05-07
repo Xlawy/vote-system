@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import {
   AppBar,
@@ -8,8 +10,12 @@ import {
 } from '@mui/material';
 import { HowToVote } from '@mui/icons-material';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
+import { UserAvatar } from '@/components/UserAvatar';
 
 const Header = () => {
+  const { user, isAuthenticated } = useAuth();
+
   return (
     <AppBar 
       position="fixed" 
@@ -43,7 +49,7 @@ const Header = () => {
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           <Button 
             color="inherit" 
             component={Link} 
@@ -56,33 +62,55 @@ const Header = () => {
           >
             投票列表
           </Button>
-          <Button 
-            color="inherit" 
-            component={Link} 
-            href="/auth/login"
-            sx={{ 
-              '&:hover': { 
-                backgroundColor: 'rgba(255, 255, 255, 0.1)' 
-              }
-            }}
-          >
-            登录
-          </Button>
-          <Button 
-            variant="outlined" 
-            color="inherit" 
-            component={Link} 
-            href="/auth/register"
-            sx={{ 
-              borderColor: 'rgba(255, 255, 255, 0.5)',
-              '&:hover': {
-                borderColor: 'rgba(255, 255, 255, 0.8)',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-              }
-            }}
-          >
-            注册
-          </Button>
+          
+          {isAuthenticated && (user?.role === 'admin' || user?.role === 'superAdmin') && (
+            <Button 
+              color="inherit" 
+              component={Link} 
+              href="/polls/create"
+              sx={{ 
+                '&:hover': { 
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)' 
+                }
+              }}
+            >
+              创建投票
+            </Button>
+          )}
+          
+          {isAuthenticated ? (
+            <UserAvatar />
+          ) : (
+            <>
+              <Button 
+                color="inherit" 
+                component={Link} 
+                href="/auth/login"
+                sx={{ 
+                  '&:hover': { 
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)' 
+                  }
+                }}
+              >
+                登录
+              </Button>
+              <Button 
+                variant="outlined" 
+                color="inherit" 
+                component={Link} 
+                href="/auth/register"
+                sx={{ 
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                  '&:hover': {
+                    borderColor: 'rgba(255, 255, 255, 0.8)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                  }
+                }}
+              >
+                注册
+              </Button>
+            </>
+          )}
         </Box>
       </Toolbar>
     </AppBar>
