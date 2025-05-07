@@ -204,24 +204,25 @@ export default function CreateVotePage() {
                       }}
                     />
                   </Button>
-                  {form.banner && (
-                    <Box
-                      sx={{
-                        width: 200,
-                        height: 100,
-                        borderRadius: 1,
-                        overflow: 'hidden',
-                        '& img': {
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover'
-                        }
-                      }}
-                    >
-                      <img src={form.banner} alt="Banner preview" />
-                    </Box>
-                  )}
                 </Box>
+                {form.banner && (
+                  <Box sx={{ mt: 2, width: '100%', height: 200, position: 'relative' }}>
+                    <img
+                      src={form.banner.startsWith('http') ? form.banner : `http://localhost:8000${form.banner}`}
+                      alt="Banner preview"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '8px'
+                      }}
+                      onError={(e) => {
+                        console.error('图片加载失败:', form.banner);
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </Box>
+                )}
               </Box>
 
               <TextField
