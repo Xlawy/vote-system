@@ -116,12 +116,12 @@ export const UserAvatar = () => {
           </ListItemIcon>
           <ListItemText>个人资料</ListItemText>
         </MenuItem>
-        <MenuItem onClick={handleSettings}>
+        {/* <MenuItem onClick={handleSettings}>
           <ListItemIcon>
             <Settings fontSize="small" />
           </ListItemIcon>
           <ListItemText>账号设置</ListItemText>
-        </MenuItem>
+        </MenuItem> */}
         <Divider />
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
