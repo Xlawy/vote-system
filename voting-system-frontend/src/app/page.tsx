@@ -84,46 +84,6 @@ export default function Home() {
             mt: 4
           }}
         >
-          {/* 右上角登录注册按钮 */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 16,
-              right: 16,
-              display: 'flex',
-              gap: 2
-            }}
-          >
-            <Button
-              variant="text"
-              component={Link}
-              href="/auth/login"
-              sx={{
-                color: '#1976d2',
-                '&:hover': {
-                  backgroundColor: 'rgba(25, 118, 210, 0.04)'
-                }
-              }}
-            >
-              登录
-            </Button>
-            <Button
-              variant="outlined"
-              component={Link}
-              href="/auth/register"
-              sx={{
-                borderColor: '#1976d2',
-                color: '#1976d2',
-                '&:hover': {
-                  backgroundColor: 'rgba(25, 118, 210, 0.04)',
-                  borderColor: '#1565c0'
-                }
-              }}
-            >
-              注册
-            </Button>
-          </Box>
-
           <Typography
             variant="h2"
             component="h1"
