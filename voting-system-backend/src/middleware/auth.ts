@@ -10,7 +10,7 @@ export const auth = (roles?: UserRole[]): express.RequestHandler => {
       const token = req.header('Authorization')?.replace('Bearer ', '');
       
       if (!token) {
-        next(new Error('未提供认证令牌'));
+        next(new Error('请先登录'));
         return;
       }
 

@@ -19,7 +19,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      res.status(401).json({ message: '未提供认证令牌' });
+      res.status(401).json({ message: '请先登录' });
       return;
     }
 
